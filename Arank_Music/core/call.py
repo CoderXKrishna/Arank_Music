@@ -1,6 +1,3 @@
-Here's the modified code with the `TelegramServerError` exception removed:
-
-```python
 import asyncio
 import os
 from datetime import datetime, timedelta
