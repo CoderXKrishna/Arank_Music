@@ -1,5 +1,5 @@
 aiofiles
-aiohttp==3.9.3
+aiohttp
 asyncio
 beautifulsoup4
 dnspython
@@ -25,5 +25,5 @@ youtube-search
 youtube-search-python
 Flask==2.2.2
 gunicorn==20.1.0
-aiohttp==3.8.2
+aiohttp==3.9.3
 
