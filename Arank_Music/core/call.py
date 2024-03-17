@@ -13,6 +13,7 @@ from pytgcalls.exceptions import (
 from pytgcalls.types import Update
 from pytgcalls.types.input_stream import AudioPiped, AudioVideoPiped
 from pytgcalls.types.input_stream.quality import HighQualityAudio, MediumQualityVideo
+from pytgcalls.types.stream import StreamAudioEnded
 
 import config
 from Arank_Music import LOGGER, YouTube, app
@@ -212,9 +213,7 @@ class Call(PyTgCalls):
             db[chat_id][0]["played"] = con_seconds
             db[chat_id][0]["dur"] = duration
             db[chat_id][0]["seconds"] = dur
-            db[chat_id][0]["speed_path"] =
-
- out
+            db[chat_id][0]["speed_path"] = out
             db[chat_id][0]["speed"] = speed
 
     async def force_stop_stream(self, chat_id: int):
@@ -317,6 +316,8 @@ class Call(PyTgCalls):
             raise AssistantErr(_["call_8"])
         except AlreadyJoinedError:
             raise AssistantErr(_["call_9"])
+        except TelegramServerError:
+            raise AssistantErr(_["call_10"])
         await add_active_chat(chat_id)
         await music_on(chat_id)
         if video:
@@ -389,10 +390,39 @@ class Call(PyTgCalls):
                         original_chat_id,
                         text=_["call_6"],
                     )
-                img = await get_thumb(videoid)
-                button = stream_markup(_, chat_id)
-                run = await app.send_photo(
-                    chat_id=original_chat_id,
-                    photo=img,
-                    caption=_["stream_1"].format(
-                        f"https://t.me/{app.username}?start=
+            elif "radio_" in queued:
+                try:
+                    await self.join_call(chat_id, original_chat_id, queued)
+                except Exception:
+                    return await app.send_message(
+                        original_chat_id,
+                        text=_["call_7"],
+                    )
+            else:
+                thumb = await get_thumb(videoid, True)
+                await app.send_photo(
+                    original_chat_id,
+                    photo=thumb,
+                    caption=_["call_5"].format(title, user),
+                    reply_markup=InlineKeyboardMarkup(
+                        stream_markup(videoid, queued, video),
+                    ),
+                )
+
+    async def check_stream(self, update: Update):
+        LOGGER.info("Check Called")
+        chat_id = update.chat_id
+        if not update.is_audio_call:
+            return
+        chat = await app.get_chat(chat_id)
+        if not chat:
+            return
+        try:
+            db[chat_id]
+        except:
+            return
+        try:
+            await self.change_stream(app, chat_id)
+        except Exception as e:
+            print(str(e))
+            LOGGER.error(str(e))
