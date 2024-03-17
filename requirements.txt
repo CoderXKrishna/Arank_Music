@@ -1,5 +1,5 @@
 aiofiles
-aiohttp
+aiohttp==3.9.3
 asyncio
 beautifulsoup4
 dnspython
